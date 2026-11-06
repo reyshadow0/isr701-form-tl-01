@@ -1,0 +1,35 @@
+# Archivos auxiliares de LaTeX (el PDF compilado SÍ se versiona)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.synctex(busy)
+*.toc
+*.lol
+*.nav
+*.snm
+*.xdv
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+__pycache__/
+*.pyc
+.env
+node_modules/
+
+# Respaldos y temporales de draw.io
+*.drawio.bkp
+*.drawio.dtmp
+*.bkp
+*.dtmp

@@ -1,0 +1,93 @@
+\documentclass[11pt,a4paper]{article}
+
+% Datos de la actividad
+\newcommand{\codigoactividad}{FORM-TL-01}
+\newcommand{\nombreactividad}{Taller de modelado de comunicación entre procesos distribuidos}
+\newcommand{\escenario}{Plataforma de streaming}
+\newcommand{\integrantes}{Castro Coello Mario Sebastián \\ Loor Suárez Steffanny del Rocío \\ Quintero Rico Luis David \\ Rivas Piloso Dayver Yahir}
+\newcommand{\repositorio}{https://github.com/reyshadow0/isr701-form-tl-01}
+\newcommand{\fechaentrega}{5 de noviembre de 2026}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla,es-nodecimaldot]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=ieee]{biblatex}
+\addbibresource{referencias.bib}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{diagrama/}}
+
+% Permite cortar URL largas en la bibliografía (evita desbordes)
+\setcounter{biburlnumpenalty}{100}
+\setcounter{biburlucpenalty}{100}
+\setcounter{biburllcpenalty}{100}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  showstringspaces=false,
+  extendedchars=true,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+           {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {¿}{{?`}}1 {¡}{{!`}}1
+}
+\renewcommand{\lstlistingname}{Código}
+
+\hypersetup{pdftitle={\codigoactividad: \nombreactividad}}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  {\large\bfseries UNIVERSIDAD TÉCNICA ESTATAL DE QUEVEDO\par}
+  \vspace{0.3cm}
+  {Facultad de Ciencias de la Computación\par}
+  {Carrera de Software\par}
+  \vspace{2.5cm}
+  {\large Aplicaciones Distribuidas (ISR-701)\par}
+  \vspace{1.5cm}
+  {\Large\bfseries \codigoactividad\par}
+  \vspace{0.4cm}
+  {\LARGE \nombreactividad\par}
+  \vspace{1cm}
+  {\large Notas de la presentación\par}
+  \vspace{0.2cm}
+  {\large Escenario: \escenario\par}
+  \vfill
+  \begin{tabular}{@{}rl@{}}
+    \textbf{Integrantes:}      & \begin{tabular}[t]{@{}l@{}}\integrantes\end{tabular} \\[2pt]
+    \textbf{Docente:}          & Gleiston Cicerón Guerrero Ulloa, PhD \\
+    \textbf{Nivel / paralelo:} & Séptimo nivel / B \\
+    \textbf{Periodo:}          & SPA 2026--2027 \\
+    \textbf{Fecha:}            & \fechaentrega \\
+  \end{tabular}
+  \par\vspace{1cm}
+  {\small Repositorio: \url{\repositorio}\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\input{secciones/01-escenario}
+\input{secciones/02-diagrama}
+\input{secciones/03-sincronas}
+\input{secciones/04-asincronas}
+\input{secciones/05-preguntas}
+\input{secciones/06-declaracion-ia}
+
+\printbibliography[heading=bibintoc,title={Referencias}]
+
+\end{document}
