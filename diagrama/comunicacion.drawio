@@ -13,7 +13,7 @@
         <mxCell id="TybLkOHYomKtAao4TwRG-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;GW&lt;/b&gt;&lt;div&gt;Puerta de enlace (API Gateway)&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="175" x="326" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="TybLkOHYomKtAao4TwRG-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;AUT&lt;/b&gt;&lt;div&gt;Servicio de autenticación&lt;/div&gt;" vertex="1">
+        <mxCell id="TybLkOHYomKtAao4TwRG-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;AUT&lt;/b&gt;&lt;div&gt;Servicio de autenticación y licencias&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="150" x="80" y="455" as="geometry" />
         </mxCell>
         <mxCell id="TybLkOHYomKtAao4TwRG-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;CAT&lt;/b&gt;&lt;div&gt;Servicio de catálogo&lt;/div&gt;" vertex="1">
@@ -57,6 +57,21 @@
         </mxCell>
         <mxCell id="2kdvBRl4EcbkcVkqeVPK-6" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;fontSize=13;fontStyle=1" value="Leyenda" vertex="1">
           <mxGeometry height="30" width="60" x="1110" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="sync-s1" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-2" target="TybLkOHYomKtAao4TwRG-8" style="endArrow=classic;html=1;rounded=0;fontFamily=Times New Roman;fontSize=12;labelBackgroundColor=default;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="&lt;b&gt;S1&lt;/b&gt; · Sockets TCP&lt;br&gt;Solicitar segmento / Datos del segmento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sync-s2s4" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-2" target="TybLkOHYomKtAao4TwRG-3" style="endArrow=classic;html=1;rounded=0;fontFamily=Times New Roman;fontSize=12;labelBackgroundColor=default;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="&lt;b&gt;S2, S4&lt;/b&gt; · HTTP/2&lt;br&gt;Licencia / Catálogo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sync-s2" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-3" target="TybLkOHYomKtAao4TwRG-5" style="endArrow=classic;html=1;rounded=0;fontFamily=Times New Roman;fontSize=12;labelBackgroundColor=default;edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="&lt;b&gt;S2&lt;/b&gt; · gRPC / HTTP/2&lt;br&gt;Verificar licencia / Permitido o denegado + token">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sync-s4" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-3" target="TybLkOHYomKtAao4TwRG-6" style="endArrow=classic;html=1;rounded=0;fontFamily=Times New Roman;fontSize=12;labelBackgroundColor=default;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="&lt;b&gt;S4&lt;/b&gt; · gRPC / HTTP/2&lt;br&gt;Consultar catálogo / Resultados y metadatos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sync-s3" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-5" target="TybLkOHYomKtAao4TwRG-9" style="endArrow=classic;html=1;rounded=0;fontFamily=Times New Roman;fontSize=12;labelBackgroundColor=default;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="&lt;b&gt;S3&lt;/b&gt; · gRPC / HTTP/2&lt;br&gt;Consultar suscripción / Activa, vencida o cancelada">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
