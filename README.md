@@ -6,10 +6,10 @@ Aplicaciones Distribuidas (ISR-701) · Universidad Técnica Estatal de Quevedo �
 
 ## Integrantes (grupo CLQR)
 
-- Castro Coello Mario Sebastián
-- Loor Suárez Steffanny del Rocío
-- Quintero Rico Luis David
-- Rivas Piloso Dayver Yahir
+- Castro Coello Mario Sebastián (`reyshadow0`)
+- Loor Suárez Steffanny del Rocío (`SteffannyLoorSuarez1`)
+- Quintero Rico Luis David (`Kinetro`)
+- Rivas Piloso Dayver Yahir (`drivasp`)
 
 ## Contenido del repositorio
 
