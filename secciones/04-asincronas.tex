@@ -2,31 +2,40 @@
 \label{sec:asincronas}
 
 En la plataforma de OndaPlay empleamos comunicación asíncrona para aquellos flujos donde el emisor no requiere una respuesta rápida para continuar con su flujo de 
-trabajo, prorizando la disponibilidad y la baja latencia al usuario final. Seleccionamos apache kafka como el middleware principal de mensajería para manejar la
- ingesta masiva y el procesamiento de eventos de telemetría y recomendacionesn, mientras que RabbitMQ se usa para la propagación de eventos de dominio críticos entre 
- facturacíon y licencias.
+trabajo, priorizando la disponibilidad y la baja latencia al usuario final. Seleccionamos apache kafka como el middleware principal de mensajería para manejar la
+ ingesta masiva y el procesamiento de eventos de telemetría y recomendaciones, mientras que RabbitMQ se usa para la propagación de eventos de dominio críticos entre 
+ facturación y licencias. Para la gestión de mensajes utilizamos dos middlewares especializados: Apache Kafka (\texttt{KFK}) para la ingesta masiva de eventos de telemetría y recomendaciones
+ en tiempo real debido a su arquitectura de registro distribuido en disco, y RabbitMQ (\texttt{RMQ}) como bróker de mensajeria empresarial para la transmisión
+ fiable y orientada a eventos de dominio entres los servicios de facturación y licencias.
 
 \subsection{A1: Envío de telemetría (Reproductor $\rightarrow$ Telemetría)}
 \label{sub:a1}
 
 \begin{itemize}
     \item \textbf{Emisor $\rightarrow$ receptor:} 
-    `CLI` (Reproductor en app/web/TV) $\rightarrow$ Servicio de Telemetría (via API Gateway).
+    CLI (Reproductor en app/web/TV) $\rightarrow$ TEL (Servicio de Telemetría).
 
     \item \textbf{Mensaje:}
-    Evento en JSON con los campos: \texttt{user\_id}, \texttt{content\_id}, \texttt{event\_type}, (play, pause, buffer\_empty, quality\_change), \texttt{timestamp} y \texttt{metrics} (bitrate actual, fotogramas perdidos).
+    Evento en JSON con los campos:
+    \begin{itemize}
+        \item \texttt{user\_id}, \texttt{session\_id}, \texttt{content\_id}
+        \item \texttt{event\_type},(play, pause, buffer\_empty, quality\_change)
+        \item \texttt{timestamp}, \texttt{metrics} (bitrate actual, fotogramas pedidos)
+
+    \end{itemize}
 
     \item \textbf{Tipo:}
-    Punto a punto (Cliente a API de Ingesta).
+    Cliente-Servidor (Petición/Respuesta no bloqueante).
 
     \item \textbf{Por qué es asíncrona:}
-    El reproductor no debe de bloquear la interfaz ni la reproduccion del video esperando a que el servidor procese las métricas enviadas.
+    La petición HTTP se dispara desde un hilo secundario en el reproductor mediante una estrategia de dispari y olvido (\textit{fire-and-forget}). El cliente no bloquea la interfaz de usuario
+    ni congela el buffer de video en espera 
 
     \item \textbf{Protocolo:}
     HTTP/2 mediante peticiones REST/JSON sobre HTTPS.
 
     \item \textbf{Middleware:}
-    Nginx como API Gateway enviando el flujo hacia apache Kafka.
+    No aplica a la recepción inicial; el servicio TEL recibe la petición HTTP directamente y deposita el evento en Apache Kafka (\texttt{kfk}).
 
     \item \textbf{Justificación:}
     \begin{itemize}
@@ -37,10 +46,13 @@ trabajo, prorizando la disponibilidad y la baja latencia al usuario final. Selec
         Según R3, se acepta perder hasta un 1\,\% de los mensajes de telemetría sin que afecte a la métrica global ni interrumpa el servicio al usuario.
 
         \item \textit{Alternativa descartada:}
-        Se descartó gRPC/RPC síncrono porque acoplaría el cliente al tiempo de respuesta del servidor y añadiría sobrecarga innecesaria por confirmación en cada evento de 10 segundos.
+        Se descarto gRPC sincrono porque acoplaría el hilo principal del reproductor a la latencia de red. Y asi mismo, se descarto RabbitMQ para apache Kafka debido a que RabbitMQ
+        sufriría mayor degradación ante ráfagas masivas en 5\,000 eventos/s, mientras Kafka escribe en disco secuencialmente mediante logs distribuidos con mejor rendimiento.
 
         \item \textit{Si el receptor no responde:}
-        El cliente guarda un buffer circular en memoria local de los últimos 3 a 5 eventos. Si la falla persiste y el buffer se llena, descarta los paquetes viejos respetando el 1\,\% de pérdida tolerado.
+        El cliente guarda un buffer circular en memoria local de los últimos 3 a 5 eventos. Si TEL pasa más de 50 segundos caído, el reproductor empieza a descartar los paquetes mas antiguos para no saturar la RAM del dispositivo
+        asumiendo que se superarael 1\,\% de pérdida pero tolerando que el video no se detenga.
+         
     \end{itemize}
 \end{itemize}
 
@@ -49,13 +61,18 @@ trabajo, prorizando la disponibilidad y la baja latencia al usuario final. Selec
 
 \begin{itemize}
     \item \textbf{Emisor $\rightarrow$ receptor:}
-    Servicio de Telemetría $\rightarrow$ `MSG` (Apache Kafka) $\rightarrow$ servicio de Recomendaciones.
+    TEL (Servicio de Telemetría) $\rightarrow$ (\texttt{kfk}) (Apache Kafka) $\rightarrow$ REC (servicio de Recomendaciones).
 
     \item \textbf{Mensaje:}
-    Objeto consolidado del evento visto \texttt{user\_id}, \texttt{content\_id}, \texttt{watch\_duration\_seconds}, \texttt{completion\_percentage}, \texttt{timestamps}.
-
+    Objeto consolidado del evento visto 
+    \begin{itemize}
+        \item \texttt{user\_id}, \texttt{content\_id}
+        \item \texttt{watch\_duration\_seconds}
+        \item \texttt{completion\_percentage}, \texttt{timestamp}
+    \end{itemize}
+    
     \item \textbf{Tipo:}
-    Publicacion / Suscripción (Pub/Sub).
+    Publicación / Suscripción (Pub/Sub).
 
     \item \textbf{Por qué es asíncrona:}
     El procesamiento de algoritmos de recomendación consume bastantes recursos y no es necesario actualizar el perfil del usuario en tiempo real instante a instante.
@@ -64,19 +81,19 @@ trabajo, prorizando la disponibilidad y la baja latencia al usuario final. Selec
     Protocolo binario de Kafka sobre TCP.
 
     \item \textbf{Middleware:}
-    Apache Kafka (Topic de telemetría procesada).
+    Apache Kafka (\texttt{kfk}) (Topic de telemetría procesada).
 
     \item \textbf{Justificación:}
     \begin{itemize}
         \item \textit{Retraso aceptable:}
-        Se ajusta al requisito R5, el cual permite hasta 15 minutos de restraso en la actualización del catálogo de recomendaciones (consistencia eventual).
+        Se ajusta al requisito R5, el cual permite hasta 15 minutos de retraso en la actualización del catálogo de recomendaciones (consistencia eventual).
 
         \item \textit{Alternativa descartada:}
         Se descartó RabbitMQ en memoria porque Kafka ofrece una persistencia en disco basada en archivos de registro (\textit{commit logs}) mucho más eficiente para volúmenes altos en tiempo real.
 
         \item \textit{Si el receptor no responde:}
         Frente al escenario F2 (Recomendaciones caído por 2 horas), los mensajes se quedan retenidos de forma segura en las particiones del Topic de Kafka. Al volver
-         a estar en línea, el seervicio lee desde el último \textit{offset} guardado y procesa el atraso sin perder ningún evento de visualización.
+         a estar en línea, el servicio REC lee desde el último \textit{offset} guardado y procesa el atraso sin perder ningún evento de visualización.
     \end{itemize}
 \end{itemize}
 
@@ -86,16 +103,22 @@ trabajo, prorizando la disponibilidad y la baja latencia al usuario final. Selec
 
 \begin{itemize}
     \item \textbf{Emisor $\rightarrow$ receptor:}
-    `PAG` (Servivio de Facturación) $\rightarrow$ `MSG` (RabbitMQ) $\rightarrow$ `AUT` (Servicio de Licencias).
+    PAG (Servicio de Facturación) $\rightarrow$ \texttt{RMQ} (RabbitMQ) $\rightarrow$ AUT (Servicio de Licencias).
 
     \item \textbf{Mensaje:}
-    Evento de dominio en JSON: \texttt{event\_id}, \texttt{user\_id}, \texttt{event\_type}, (SUBSCRIPTION\_CANCELLED, RENEWED, PAYMENT\_FAILED), \texttt{expiration\_timestamp}.
-
+    Evento de dominio en JSON: 
+    \begin{itemize}
+       \item \texttt{event\_id}, \texttt{user\_id}
+       \item \texttt{event\_type},(SUBSCRIPTION\_CANCELLED, RENEWED, PAYMENT\_FAILED)
+       \item \texttt{expiration\_timestamp}.
+    \end{itemize}
+    
+    
     \item \textbf{Tipo:}
     Publicación / Suscripción (Pub/Sub).
 
     \item \textbf{Por qué es asíncrona:}
-    Evita que la pasarela de pagos o el proceso de cobros dependa del tiempo de respuesta del servicio de licencias o de la base de datos de usuarios.
+    Evita que la pasarela de pagos o el proceso de cobros dependa del tiempo de respuesta del servicio de licencias.
 
     \item \textbf{Protocolo:}
     AMQP (Advanced Message Queuing Protocol).
@@ -106,14 +129,14 @@ trabajo, prorizando la disponibilidad y la baja latencia al usuario final. Selec
     \item \textbf{Justificación:}
     \begin{itemize}
         \item \textit{Tiempo máximo:}
-        Responde al requisito R4, garantizando que el bloqueo ocurra en menos de 5 minutos. Al recibir el evento A3, el servicio `AUT` invalida de inmediato la memoria caché (Redis),
+        Responde al requisito R4, garantizando que el bloqueo ocurra en menos de 5 minutos. Al recibir el evento A3, el servicio AUT invalida de inmediato la memoria caché (Redis),
         lo que encaja con los 4 minutos máximos contemplados en el flujo sincrono S3 (60 s de TTL en caché + 3 min de expiración de token.)
 
         \item \textit{Alternativa descartada:}
-        Se descartó hacer \textit{polling} periódicos desde Licencias a la base de datos de Facturación, ya que generaría miles de consultas innecesarias a la base de datos central.
+        Se descartó hacer peticiones síncronas periódicas desde AUT hacias PAG, ya que generaría tráfico de red innecesario y acoplamiento directo entre ambos servicios. 
 
         \item \textit{Si el receptor no responde:}
-        Se utiliza entrega con confirmación explicita (\textit{manual ACK}. Si `AUT` cae, RabbitMQ mantiene los mensajes persistidos en la cola. Tras superar el límite de 
-        reintentos, los eventos fallidos se envían a una \textit{Dead Letter Queue} (DLQ) para auditarlos sin descartar notificaciones ).
+        Se utiliza entrega con confirmación explicita (\textit{manual ACK}). Si AUT cae, RabbitMQ mantiene los mensajes persistidos en la cola. Tras superar el límite de 
+        reintentos, los eventos fallidos se envían a una (\textit{Dead Letter Queue}) (DLQ) para auditarlos sin descartar notificaciones.
     \end{itemize}
 \end{itemize}
