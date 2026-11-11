@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net">
+<mxfile host="Electron">
   <diagram name="Página-1" id="vnhm85yoSjE68PCLtI67">
-    <mxGraphModel dx="895" dy="395" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="2881" dy="1249" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -14,6 +14,9 @@
           <mxGeometry relative="1" x="-0.1538" as="geometry">
             <mxPoint y="-1" as="offset" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="4Y5ZNY2kcw9rcM-awsPY-4" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;fontFamily=Times New Roman;endArrow=open;endFill=0;" target="4Y5ZNY2kcw9rcM-awsPY-1" value="&lt;b&gt;A1-Petición sin esperar respuesta /HTTP/2&lt;br&gt;&lt;/b&gt;Evento de telemetria">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="TybLkOHYomKtAao4TwRG-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;CLI&lt;/b&gt;&lt;div&gt;Cliente (app web/móvil)&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="130" x="348.5" y="205" as="geometry" />
@@ -34,11 +37,16 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="LE_IZBrL6VNyfDwetC09-10" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="TybLkOHYomKtAao4TwRG-8">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="LE_IZBrL6VNyfDwetC09-10" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;exitX=1;exitY=1;exitDx=0;exitDy=0;" target="TybLkOHYomKtAao4TwRG-8">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="475.9" y="300" />
+              <mxPoint x="650" y="300" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="LE_IZBrL6VNyfDwetC09-11" connectable="0" parent="LE_IZBrL6VNyfDwetC09-10" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];inheritText=1;defaultLabelBackgroundColor=page;" value="&lt;div&gt;&lt;b&gt;&lt;font face=&quot;Times New Roman&quot;&gt;S1 - Sockets TCP&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;Solicitar segmento / Datos del segmento&lt;/font&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry relative="1" x="0.3187" y="2" as="geometry">
+          <mxGeometry relative="1" x="0.5366" y="2" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
@@ -60,7 +68,12 @@
           <mxGeometry height="60" width="150" x="338" y="455" as="geometry" />
         </mxCell>
         <mxCell id="TybLkOHYomKtAao4TwRG-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;VID&lt;/b&gt;&lt;div&gt;Servidor de video&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="150" x="596" y="455" as="geometry" />
+          <mxGeometry height="60" width="150" x="580" y="515" as="geometry" />
+        </mxCell>
+        <mxCell id="4Y5ZNY2kcw9rcM-awsPY-7" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;fontFamily=Times New Roman;endArrow=open;endFill=0;" target="4Y5ZNY2kcw9rcM-awsPY-3" value="&lt;b&gt;A3-Pub AMQP&lt;br&gt;&lt;/b&gt;Cambio de suscripción">
+          <mxGeometry relative="1" x="0.0105" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="TybLkOHYomKtAao4TwRG-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;PAG&lt;/b&gt;&lt;div&gt;Servicio de suscripciones y pagos&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="150" x="80" y="585" as="geometry" />
@@ -69,10 +82,13 @@
           <mxGeometry height="60" width="150" x="338" y="585" as="geometry" />
         </mxCell>
         <mxCell id="TybLkOHYomKtAao4TwRG-11" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;BD&lt;/b&gt;&lt;div&gt;Base de datos&lt;/div&gt;" vertex="1">
-          <mxGeometry height="80" width="80" x="890" y="490" as="geometry" />
+          <mxGeometry height="80" width="80" x="930" y="585" as="geometry" />
         </mxCell>
-        <mxCell id="TybLkOHYomKtAao4TwRG-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;MSG&lt;/b&gt;&lt;div&gt;Bróker de mensajes&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="150" x="326" y="750" as="geometry" />
+        <mxCell id="4Y5ZNY2kcw9rcM-awsPY-6" edge="1" parent="1" source="TybLkOHYomKtAao4TwRG-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;fontFamily=Times New Roman;endArrow=open;endFill=0;" target="4Y5ZNY2kcw9rcM-awsPY-2" value="&lt;b&gt;A2-Sub / Kafka sobre TCP&lt;br&gt;&lt;/b&gt;Evento de visualización">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="TybLkOHYomKtAao4TwRG-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;KFK&lt;/b&gt;&lt;div&gt;Apache Kafka&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="150" x="827" y="380" as="geometry" />
         </mxCell>
         <mxCell id="2kdvBRl4EcbkcVkqeVPK-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;" value="" vertex="1">
           <mxGeometry height="230" width="490" x="1090" y="100" as="geometry" />
@@ -97,6 +113,26 @@
         </mxCell>
         <mxCell id="2kdvBRl4EcbkcVkqeVPK-6" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;fontSize=13;fontStyle=1" value="Leyenda" vertex="1">
           <mxGeometry height="30" width="60" x="1110" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="4Y5ZNY2kcw9rcM-awsPY-5" edge="1" parent="1" source="4Y5ZNY2kcw9rcM-awsPY-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;fontFamily=Times New Roman;endArrow=open;endFill=0;" target="TybLkOHYomKtAao4TwRG-12" value="&lt;b&gt;A2-Pub / Kafka sobre TCP&lt;br&gt;&lt;/b&gt;Evento de visualización">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Y5ZNY2kcw9rcM-awsPY-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;TEL&lt;/b&gt;&lt;br&gt;&lt;div&gt;Servicio de telemetría&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="150" x="827" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="4Y5ZNY2kcw9rcM-awsPY-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Times New Roman;fontSize=13;" value="&lt;div&gt;&lt;b&gt;REC&lt;/b&gt;&lt;/div&gt;&lt;div&gt;Servicio de recomendaciones&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="150" x="1150" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="4Y5ZNY2kcw9rcM-awsPY-8" edge="1" parent="1" source="4Y5ZNY2kcw9rcM-awsPY-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;fontFamily=Times New Roman;endArrow=open;endFill=0;" target="TybLkOHYomKtAao4TwRG-5" value="&lt;b&gt;A3-Sub AMQP&lt;br&gt;&lt;/b&gt;Cambio de suscripción">
+          <mxGeometry relative="1" x="0.0025" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="770" />
+              <mxPoint x="20" y="485" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4Y5ZNY2kcw9rcM-awsPY-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Times New Roman;fontSize=13;" value="&lt;b&gt;RMQ&lt;/b&gt;&lt;br&gt;&lt;div&gt;RabbitMQ&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="150" x="80" y="740" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
