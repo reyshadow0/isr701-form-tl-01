@@ -1,1 +1,53 @@
-\section{Diagrama de comunicación}
+
+\section{Diagrama de comunicación entre procesos}
+
+El diagrama de OndaPlay muestra cómo se comunican los
+procesos que intervienen en el funcionamiento de esta
+plataforma de streaming. En él se representan los
+servicios que participan en las solicitudes del cliente,
+la verificación de licencias y suscripciones, la consulta
+del catálogo y el acceso al contenido audiovisual.
+
+\subsection{Componentes del sistema}
+
+Los componentes se identifican mediante códigos que
+permiten reconocerlos dentro del diagrama. CLI representa
+al cliente que utiliza la aplicación web o móvil, mientras
+que GW corresponde a la puerta de enlace que recibe y
+dirige las solicitudes hacia los servicios internos.
+
+AUT se encarga de la autenticación y las licencias, CAT representa el servicio de catálogo, VID corresponde
+al servidor de video, y PAG identifica al servicio de
+facturación y suscripciones.
+
+\subsection{Notación utilizada}
+
+Las flechas indican la dirección en la que se envían
+los mensajes entre los procesos. Se utilizan líneas
+continuas para representar las comunicaciones síncronas,
+en las que el emisor espera una respuesta antes de
+continuar, y líneas discontinuas para las comunicaciones
+asíncronas, en las que el emisor no necesita esperar
+una respuesta inmediata.
+
+Cada interacción se identifica con un código; La letra
+S seguida de un número corresponde a una comunicación
+síncrona, mientras que la letra A es utilizada para una
+comunicación asíncrona. Junto a cada etiqueta se detallan los datos intercambiados, el mecanismo de
+comunicación y el protocolo utilizado.
+
+\subsection{Lectura del diagrama}
+
+En las interacciones síncronas representadas, la puerta
+de enlace se comunica con el servicio de autenticación
+y licencias mediante S2, con el servicio de catálogo
+mediante S4.
+
+Por su parte, la interacción S3 conecta el servicio
+de autenticación y licencias con el servicio de
+facturación y suscripciones para consultar el estado
+de una suscripción.
+
+Las interacciones S2, S3 y S4 utilizan gRPC sobre
+HTTP/2. Los detalles de estas comunicaciones se desarrollan de una manera más amplia en la sección 3,
+dedicada a las interacciones síncronas.
