@@ -1,1 +1,145 @@
 \section{Escenario y procesos}
+\label{sec:escenario}
+
+\subsection{Qué es OndaPlay}
+
+El caso viene del enunciado del escenario 2 (Anexo A de la rúbrica
+GA-TL-01). OndaPlay es un servicio de streaming ficticio, con
+suscripción, que combina catálogo bajo demanda y eventos en vivo de
+fin de semana, y que se ve desde el celular, la televisión o el
+navegador. El rediseño parte de tres fallas actuales: arranque lento
+del video en los eventos en vivo, reproducciones de usuarios sin
+suscripción vigente y datos de visualización que llegan tarde al
+equipo de recomendaciones.
+
+\subsection{Actores y frontera del sistema}
+
+El suscriptor usa el reproductor para iniciar sesión, buscar títulos,
+ver contenido y renovar su plan. El administrador de contenidos carga
+títulos, temporadas y metadatos en el catálogo. La pasarela de pagos
+es un sistema externo que procesa los cobros de las suscripciones.
+
+Dentro de la frontera quedan los procesos que OndaPlay controla: los
+siete procesos mínimos, la puerta de enlace y el bróker de mensajes.
+La pasarela de pagos queda fuera, y OndaPlay solo se comunica con ella
+desde el servicio de facturación. Los servidores de borde de la CDN,
+que el enunciado también lista como actor, se modelan dentro del sistema
+como el proceso VID, porque son los que entregan el video al
+reproductor.
+
+\subsection{Procesos mínimos}
+
+Cada proceso usa el mismo código que en el diagrama de la sección 2.
+
+\begin{description}
+  \item[CLI] Reproductor (cliente). Inicia sesión, muestra el catálogo,
+    pide la licencia y los segmentos de video y envía la telemetría.
+  \item[AUT] Servicio de autenticación y licencias. Verifica que la
+    suscripción esté vigente y entrega la licencia para reproducir.
+  \item[CAT] Servicio de catálogo. Guarda títulos, temporadas y
+    metadatos.
+  \item[VID] Servidor de contenido o nodo de borde. Entrega los
+    segmentos de video al reproductor.
+  \item[TEL] Servicio de telemetría. Recibe los eventos del
+    reproductor: inicio, pausa, avance, errores y calidad.
+  \item[REC] Servicio de recomendaciones. Consume los eventos de
+    visualización para actualizar las recomendaciones de cada usuario.
+  \item[PAG] Servicio de facturación y suscripciones. Registra
+    renovaciones y cancelaciones, cobra a través de la pasarela de
+    pagos y responde el estado de cada suscripción.
+\end{description}
+
+\subsection{Procesos agregados: GW y MSG}
+
+GW es la puerta de enlace (API Gateway). Recibe las peticiones del
+reproductor, las dirige a AUT o a CAT y devuelve la respuesta, así el
+reproductor no necesita conocer la dirección de cada servicio interno.
+También guarda en caché las consultas frecuentes del catálogo y
+reintenta las llamadas a AUT cuando una instancia falla
+(sección~\ref{sec:sincronas}). Los segmentos de video no pasan por
+GW: el reproductor los pide directamente al nodo de borde.
+
+MSG es el bróker de mensajes. Lo agregamos para los flujos que no
+necesitan respuesta inmediata. TEL publica en MSG los eventos de
+visualización y REC los consume a su ritmo. Si REC se cae, los eventos
+quedan guardados en el bróker hasta que vuelva (F2). PAG usa el mismo
+canal para avisar a AUT de una cancelación. Estos flujos se detallan
+en la sección 4.
+
+\subsection{Por qué la solución es distribuida}
+
+Los procesos corren en máquinas distintas y se comunican solo por la
+red, sin memoria compartida. El reproductor está en el dispositivo de
+cada suscriptor, los nodos de borde se ubican cerca de los
+espectadores, los servicios internos corren en el centro de datos de
+OndaPlay y la pasarela de pagos pertenece a otra empresa.
+
+Repartir el trabajo también responde a los requisitos. Un solo
+servidor no atiende a 50\,000 espectadores simultáneos (R1), por eso
+la carga se reparte entre varios nodos de borde. La disponibilidad
+del 99,9\,\% de las licencias (R6) exige varias instancias de AUT. Y
+como REC está separado del flujo de reproducción, una caída de las
+recomendaciones no detiene el video.
+
+\subsection{Operaciones del escenario}
+
+\begin{itemize}
+  \item[(a)] \emph{Iniciar sesión y explorar el catálogo.} Las
+    búsquedas y la consulta de un título van de CLI a GW y de GW a
+    CAT (S4).
+  \item[(b)] \emph{Solicitar la licencia y empezar a reproducir.} GW
+    pide la licencia a AUT (S2) y AUT consulta a PAG el estado de la
+    suscripción (S3). Con el token de licencia, CLI pide los segmentos
+    al nodo de borde VID (S1).
+  \item[(c)] \emph{Enviar la telemetría mientras se reproduce.} CLI
+    envía a TEL un evento cada 10 segundos.
+  \item[(d)] \emph{Actualizar las recomendaciones a partir de lo
+    visto.} TEL publica los eventos de visualización en MSG y REC los
+    consume para recalcular las recomendaciones.
+  \item[(e)] \emph{Renovar la suscripción y reflejar el cambio en las
+    licencias.} PAG cobra a través de la pasarela de pagos, actualiza
+    el estado de la suscripción y avisa a AUT, que usa el nuevo estado
+    en las siguientes licencias.
+\end{itemize}
+
+\subsection{Requisitos y situaciones de fallo}
+
+El enunciado del escenario 2 fija seis requisitos cuantificados y tres
+situaciones de fallo (tabla~\ref{tab:requisitos}), y pide que el
+diseño cumpla R2 y R4 a la vez. La guía agrega una restricción: al
+menos una interacción con sockets y otra con RPC.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Requisitos cuantificados y situaciones de fallo de OndaPlay}
+  \label{tab:requisitos}
+  \begin{tabularx}{\textwidth}{@{}lX@{}}
+    \toprule
+    \textbf{Código} & \textbf{Descripción} \\
+    \midrule
+    R1 & En una transmisión en vivo puede haber 50\,000 espectadores
+         simultáneos. \\
+    R2 & El video debe empezar a reproducirse en menos de 2 segundos
+         desde que el usuario pulsa «reproducir», incluida la
+         verificación de la licencia. \\
+    R3 & Cada reproductor envía un evento de telemetría cada
+         10 segundos; en una transmisión en vivo son unos 5\,000
+         eventos por segundo. Se acepta perder hasta el 1\,\% de esos
+         eventos. \\
+    R4 & Una suscripción vencida o cancelada debe impedir nuevas
+         reproducciones en menos de 5 minutos. \\
+    R5 & Las recomendaciones pueden actualizarse con hasta 15 minutos
+         de retraso (consistencia eventual aceptable). \\
+    R6 & El servicio de licencias debe tener una disponibilidad del
+         99,9\,\%, porque sin licencia no hay reproducción. \\
+    \midrule
+    F1 & El servicio de licencias no responde: ¿se bloquea a todos los
+         usuarios o se permite reproducir durante un tiempo? \\
+    F2 & El servicio de recomendaciones está caído durante dos horas:
+         ¿se pierden los eventos de visualización de ese periodo? \\
+    F3 & Un nodo de borde falla en plena transmisión en vivo: ¿qué pasa
+         con los espectadores conectados a él? \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
