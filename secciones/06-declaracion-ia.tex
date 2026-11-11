@@ -2,13 +2,45 @@
 
 \begin{table}[H]
   \centering
+  \small
   \caption{Herramientas de inteligencia artificial usadas como apoyo}
   \label{tab:declaracion-ia}
-  \begin{tabularx}{\textwidth}{@{}llXX@{}}
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
     \toprule
     \textbf{Herramienta} & \textbf{Versión} & \textbf{Para qué se usó} & \textbf{Cómo se verificó lo obtenido} \\
     \midrule
-     & & & \\
+    Claude Code, aplicación de escritorio (Mario Castro) &
+    Claude Fable 5.2 &
+    Crear el repositorio con la plantilla LaTeX del curso, las ramas y las
+    invitaciones. Resumir la guía y la rúbrica y armar el plan de trabajo.
+    Proponer una lista inicial de procesos con códigos cortos. Redactar los
+    mensajes de coordinación del grupo. Generar la carátula del SGA. Dar los
+    comandos de Git y resolver errores. Revisar las secciones 1 y 4 y el
+    archivo del diagrama, y compilar el informe para buscar desbordes.
+    Listar estos usos a partir del registro de la sesión. &
+    Los comandos los ejecutó el integrante y el resultado se comprobó en
+    GitHub. La lista de procesos se contrastó con el Anexo A de la rúbrica:
+    se cambió por los siete procesos del enunciado y solo se conservaron los
+    códigos. Cada observación de las revisiones se comprobó en el enunciado
+    o en la sección citada antes de cambiar el texto. La compilación se
+    repite con los comandos del README. \\
+    \addlinespace
+    Claude, aplicación de escritorio, modo Cowork (Dayver Rivas) &
+    Claude Opus 5.5 &
+    Explicar la tarea, la rúbrica y conceptos de mensajería: Kafka y
+    RabbitMQ, colas y pub/sub, ACK, DLQ, retención y offset. Armar la
+    plantilla vacía de la sección 4. Instalar Git y dar sus comandos.
+    Revisar el texto de la sección 4 contra la rúbrica, el Anexo A y la
+    sección 3. Probar la compilación. &
+    Las interacciones A1, A2 y A3 se contrastaron con R3, R4, R5 y F2 del
+    Anexo A. Los tiempos de A3 se compararon con los de S3 en la sección 3.
+    El archivo se compiló en el equipo del integrante. \\
+    \addlinespace
+    GitHub Copilot en Visual Studio Code 1.145.3 (Dayver Rivas) &
+    1.0.103 &
+    Sugerencias automáticas al escribir. Se aceptó una por error. &
+    La sugerencia se borró, se desactivó la extensión y se releyó el
+    archivo completo. \\
     \bottomrule
   \end{tabularx}
 \end{table}
