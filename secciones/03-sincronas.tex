@@ -1,1 +1,324 @@
 \section{Interacciones síncronas: sockets y RPC}
+\label{sec:sincronas}
+
+En OndaPlay se utilizan comunicaciones síncronas cuando
+un proceso necesita la respuesta de otro para completar
+una operación. Esto ocurre al consultar el catálogo,
+verificar una licencia o solicitar un segmento de video.
+
+Se definieron cuatro interacciones: S1 utiliza sockets
+TCP y las otras tres emplean gRPC sobre HTTP/2.
+Para la PE-U1, sockets y gRPC se implementarán con
+mensajes equivalentes entre tres nodos, sin desarrollar
+toda la plataforma de streaming.
+
+\subsection{S1: Solicitud de segmento de video (sockets TCP)}
+\label{sub:s1}
+
+\begin{itemize}
+    \item \textbf{Emisor $\rightarrow$ receptor:}
+    Reproductor (CLI) $\rightarrow$ Nodo de borde (VID).
+    La petición va directamente al nodo que entrega
+    el contenido, sin pasar por el API Gateway.
+
+    \item \textbf{Mensaje:}
+    El reproductor solicita un segmento indicando
+    el contenido, número de segmento, calidad y
+    token de licencia. La solicitud utiliza JSON.
+    El nodo comprueba la vigencia del token y,
+    si es válido, devuelve el segmento en formato
+    binario, indicando primero su longitud.
+
+    \item \textbf{Tipo:} Sockets TCP.
+
+    \item \textbf{Por qué es síncrona:}
+    El reproductor espera los datos del segmento
+    para poder procesarlo. Mientras tanto, puede
+    continuar mostrando los segmentos que ya
+    tenga almacenados en su búfer.
+
+    \item \textbf{Protocolo:} TCP.
+
+    \item \textbf{Middleware:}
+    Ninguno. Se utiliza la API de sockets de
+    Python y un formato propio para delimitar
+    los mensajes.
+
+    \item \textbf{Justificación:}
+    \begin{itemize}
+        \item \textit{Latencia:}
+        El primer segmento debe llegar a tiempo
+        para iniciar el video en menos de
+        2 segundos (R2). La conexión directa
+        al nodo de borde evita pasar por
+        servicios que no intervienen en la
+        entrega del contenido.
+
+        \item \textit{Volumen:}
+        Una transmisión puede reunir hasta
+        50\,000 espectadores simultáneos (R1).
+        La carga se distribuye entre varios
+        nodos de borde para no depender de
+        un único servidor.
+
+        \item \textit{Respuesta inmediata:}
+        Sí. El reproductor necesita el segmento
+        solicitado para continuar la reproducción
+        cuando se agote el contenido del búfer.
+
+        \item \textit{Si no responde:}
+        Ante la caída de un nodo (F3), el
+        reproductor espera hasta un tiempo
+        límite y solicita el mismo segmento
+        a otro nodo disponible. Si no consigue
+        recuperarlo, la reproducción puede
+        interrumpirse.
+
+        \item \textit{Consistencia:}
+        Cada segmento se identifica mediante
+        su contenido, número y versión.
+        En transmisiones en vivo, los nodos
+        pueden recibir nuevos segmentos en
+        momentos diferentes, por lo que
+        deben entregar la versión correcta.
+    \end{itemize}
+
+    \item \textbf{Alternativa descartada:}
+    Una plataforma real puede utilizar HLS
+    sobre HTTP mediante una CDN. En este
+    taller se utiliza TCP directo para
+    estudiar la comunicación con sockets.
+
+    \item \textbf{Aplicación en PE-U1:}
+    El prototipo no enviará videos reales.
+    Los nodos intercambiarán mensajes JSON
+    con los campos \texttt{sender},
+    \texttt{timestamp} y \texttt{message}.
+    Se probarán tamaños aproximados de
+    100 bytes y 10 KB para comparar la
+    latencia de sockets y gRPC.
+\end{itemize}
+
+
+\subsection{S2: Verificación de licencia (gRPC)}
+\label{sub:s2}
+
+\begin{itemize}
+    \item \textbf{Emisor $\rightarrow$ receptor:}
+    Reproductor (CLI) $\rightarrow$ API Gateway
+    (GW) $\rightarrow$ Servicio de autenticación
+    y licencias (AUT). La llamada gRPC ocurre
+    entre GW y AUT.
+
+    \item \textbf{Mensaje:}
+    GW envía a AUT el identificador del usuario
+    y del contenido. AUT responde
+    \emph{permitido} o \emph{denegado}.
+    Si autoriza la reproducción, devuelve un
+    token firmado con una vigencia de 3 minutos.
+
+    \item \textbf{Tipo:} RPC.
+
+    \item \textbf{Por qué es síncrona:}
+    El reproductor necesita conocer la decisión
+    de AUT antes de solicitar el primer segmento
+    de video. Por eso S2 se completa antes de S1.
+
+    \item \textbf{Protocolo:} HTTP/2.
+
+    \item \textbf{Middleware:}
+    gRPC con Protocol Buffers.
+
+    \item \textbf{Justificación:}
+    \begin{itemize}
+        \item \textit{Latencia:}
+        La verificación forma parte de los
+        2 segundos disponibles para iniciar
+        el video (R2). gRPC utiliza mensajes
+        binarios y conexiones HTTP/2
+        reutilizables para las consultas
+        entre servicios.
+
+        \item \textit{Volumen:}
+        Al comenzar un evento en vivo pueden
+        coincidir miles de solicitudes de
+        licencia. AUT debe atenderlas mediante
+        varias instancias para soportar
+        la demanda de R1.
+
+        \item \textit{Respuesta inmediata:}
+        Sí. Sin autorización no se inicia
+        una nueva reproducción.
+
+        \item \textit{Si no responde:}
+        Para alcanzar la disponibilidad del
+        99,9\,\% exigida en R6, el diseño
+        contempla varias instancias de AUT
+        y reintentos controlados desde GW.
+
+        Si todas fallan (F1), no se emiten
+        licencias nuevas. Los usuarios que
+        tengan un token válido pueden seguir
+        solicitando segmentos hasta que expire.
+
+        Si AUT continúa caído al cumplirse
+        los 3 minutos, el reproductor no puede
+        renovar su licencia y la reproducción
+        se interrumpe cuando el nodo de borde
+        rechaza el siguiente segmento.
+
+        \item \textit{Consistencia:}
+        AUT utiliza el estado de suscripción
+        obtenido mediante S3. Como ese dato
+        puede permanecer en caché durante
+        60 segundos y el token dura 3 minutos,
+        el peor retraso desde una cancelación
+        hasta que deja de poder utilizarse
+        la autorización es de 4 minutos.
+
+        Este límite cumple R4, que exige
+        impedir nuevas reproducciones en
+        menos de 5 minutos, siempre que
+        los nodos comprueben la expiración
+        del token y no se emitan licencias
+        con información vencida.
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{S3: Consulta de suscripción (gRPC)}
+\label{sub:s3}
+
+\begin{itemize}
+    \item \textbf{Emisor $\rightarrow$ receptor:}
+    Servicio de autenticación y licencias
+    (AUT) $\rightarrow$ Servicio de
+    suscripciones y pagos (PAG).
+
+    \item \textbf{Mensaje:}
+    AUT envía el identificador del usuario.
+    PAG responde si la suscripción está
+    \emph{activa}, \emph{vencida} o
+    \emph{cancelada}.
+
+    \item \textbf{Tipo:} RPC.
+
+    \item \textbf{Por qué es síncrona:}
+    Cuando AUT no tiene un estado vigente
+    en caché, espera la respuesta de PAG
+    antes de decidir si emite la licencia.
+
+    \item \textbf{Protocolo:} HTTP/2.
+
+    \item \textbf{Middleware:}
+    gRPC con Protocol Buffers.
+
+    \item \textbf{Justificación:}
+    \begin{itemize}
+        \item \textit{Latencia:}
+        La caché conserva el estado de la
+        suscripción durante un máximo de
+        60 segundos. Esto evita consultar
+        PAG en cada solicitud y reduce
+        el tiempo de verificación de R2.
+
+        \item \textit{Volumen:}
+        Las consultas repetidas de un mismo
+        usuario se resuelven desde la caché,
+        disminuyendo la cantidad de llamadas
+        que recibe PAG.
+
+        \item \textit{Respuesta inmediata:}
+        AUT debe esperar a PAG únicamente
+        cuando no dispone de información
+        vigente en caché.
+
+        \item \textit{Si no responde:}
+        AUT utiliza un estado almacenado
+        solo si todavía está vigente.
+        Si no existe información válida,
+        deniega la solicitud de licencia.
+
+        \item \textit{Consistencia:}
+        Se utiliza consistencia eventual
+        con un retraso de caché máximo
+        de 60 segundos.
+
+        Cuando PAG registra una cancelación,
+        envía un aviso asíncrono a AUT para
+        invalidar el estado almacenado.
+        Este aviso se describe en la sección
+        de interacciones asíncronas.
+
+        El aviso reduce el tiempo habitual
+        de actualización, pero no invalida
+        por sí mismo los tokens ya emitidos.
+
+        Incluso si el aviso se retrasa,
+        la caché de 60 segundos y el token
+        de 3 minutos limitan el peor caso
+        a 4 minutos, dentro de R4.
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{S4: Exploración del catálogo (gRPC)}
+\label{sub:s4}
+
+\begin{itemize}
+    \item \textbf{Emisor $\rightarrow$ receptor:}
+    Reproductor (CLI) $\rightarrow$ API Gateway
+    (GW) $\rightarrow$ Servicio de catálogo
+    (CAT). GW utiliza gRPC para consultar CAT.
+
+    \item \textbf{Mensaje:}
+    El reproductor solicita una búsqueda
+    o los detalles de un título.
+    CAT devuelve los resultados, temporadas
+    y metadatos disponibles.
+
+    \item \textbf{Tipo:} RPC.
+
+    \item \textbf{Por qué es síncrona:}
+    GW espera la respuesta de CAT para
+    mostrar los resultados solicitados
+    por el usuario.
+
+    \item \textbf{Protocolo:} HTTP/2.
+
+    \item \textbf{Middleware:}
+    gRPC con Protocol Buffers.
+
+    \item \textbf{Justificación:}
+    \begin{itemize}
+        \item \textit{Latencia y volumen:}
+        GW guarda durante 10 minutos las
+        consultas más frecuentes, como los
+        títulos destacados de un evento en
+        vivo, para no repetir las mismas
+        llamadas al catálogo.
+
+        \item \textit{Respuesta inmediata:}
+        El usuario necesita los resultados
+        para elegir el contenido que desea
+        reproducir.
+
+        \item \textit{Si no responde:}
+        GW muestra datos previamente
+        almacenados cuando están disponibles.
+        En caso contrario, informa que
+        no pudo completar la consulta.
+
+        \item \textit{Consistencia:}
+        Se acepta que algunos metadatos
+        aparezcan con retraso. Esto no
+        afecta directamente la verificación
+        de las licencias.
+    \end{itemize}
+
+    \item \textbf{Alcance:}
+    Esta interacción forma parte del
+    diseño de OndaPlay, pero no se
+    implementará como funcionalidad
+    completa en la PE-U1.
+\end{itemize}
