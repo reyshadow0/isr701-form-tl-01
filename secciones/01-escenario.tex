@@ -88,9 +88,10 @@ recomendaciones no detiene el video.
 \subsection{Operaciones del escenario}
 
 \begin{itemize}
-  \item[(a)] \emph{Iniciar sesión y explorar el catálogo.} Las
-    búsquedas y la consulta de un título van de CLI a GW y de GW a
-    CAT (S4).
+  \item[(a)] \emph{Iniciar sesión y explorar el catálogo.} CLI envía
+    las credenciales a GW y GW las valida con AUT, que devuelve un
+    token de sesión (S5). Las búsquedas y la consulta de un título van
+    de CLI a GW y de GW a CAT (S4).
   \item[(b)] \emph{Solicitar la licencia y empezar a reproducir.} GW
     pide la licencia a AUT (S2) y AUT consulta a PAG el estado de la
     suscripción (S3). Con el token de licencia, CLI pide los segmentos
